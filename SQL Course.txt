@@ -1,0 +1,139 @@
+/****** Database Tutorial ******/
+
+/****** How to create database and utilize it ******/
+create database DemoCustomer
+use DemoCustomer
+
+/****** Create a Table ******/
+create table Customer
+(
+	FirstName varchar(50),
+	LastName varchar(50),
+	Age int 
+)
+
+/****** Insertion into tables ******/
+ insert into Customer
+ (FirstName,LastName,[Age]) 
+ values ('Joey','Tribiani',32);
+
+insert into Customer (FirstName,LastName,[Age]) values ('Barry','Bonds',50);
+insert into Customer (FirstName,LastName,[Age]) values ('Lebron','James',45);
+insert into Customer (FirstName,LastName,[Age]) values ('Mike','Tyson',60);
+insert into Customer (FirstName,LastName,[Age]) values ('Jerry','Lawler',55);
+
+insert into Customer (FirstName,LastName,[Age]) values ('Don','Bradman',53),('Brad','Pitt',57);
+
+insert into Customer (FirstName,LastName,[Age]) values ('Mike','Schmidt',52),('Mike','Schmidt1',34);
+
+/****** Selection from Tables ******/
+Select * from Customer
+
+Select FirstName,LastName from Customer
+
+Select FirstName,LastName,Age from Customer where FirstName='Jerry';
+
+Select FirstName,LastName,Age from Customer where FirstName='Jerry' and LastName='Lawler';
+
+Select FirstName,LastName,Age from Customer where FirstName='Mike' and LastName like 'Schmidt%'; --This will select the data from table that has last name as Schmidt
+
+Select FirstName,LastName,Age from Customer where FirstName='Mike' and LastName like 'Schmidt_'; --This will select the data from table that has last name as Schmidt but with extra character
+
+
+/****** Updating a Table ******/
+update Customer set Age = 35 where FirstName='Jerry' and LastName='Lawler';
+
+/****** Delete Statements ******/
+
+Delete Customer; /* This will clear all the data from the table */
+
+Delete Customer where FirstName='Mike' and LastName like 'Schmidt_';
+
+/* Add a new Column */
+
+alter table Customer
+add City varchar(50);
+
+update Customer set City = 'Las Vegas';
+
+update Customer set City = 'San Francisco' where FirstName='Jerry' and LastName='Lawler';
+update Customer set City = 'Ohio' where FirstName='Mike';
+
+--Now instead of dropping the table I will create a new one
+create table Customer1
+(
+	Id int primary key identity(1,1),
+	FirstName varchar(50),
+	LastName varchar(50),
+	Age int,
+	City varchar(50)
+)
+insert into Customer1 (FirstName,LastName,[Age],City) values ('Barry','Bonds',50,'Houston');
+insert into Customer1 (FirstName,LastName,[Age],City) values ('Lebron','James',45,'Ohio');
+insert into Customer1 (FirstName,LastName,[Age],City) values ('Mike','Tyson',60,'West Virginia');
+insert into Customer1 (FirstName,LastName,[Age],City) values ('Jerry','Lawler',55,'Oklahoma');
+
+Select * from Customer1;
+
+/* Creating Products Table */
+
+create table Products
+(
+	id int primary key identity(1,1),
+	ProductName varchar(50)
+)
+
+alter table Products add Price float;
+
+Select * from Products
+
+insert into Products (ProductName,Price) values ('Baseball', 5.95), ('Bat', 195.60);
+
+/* Creating Order Table */
+
+create table Orders 
+(
+	OrderId int primary key identity(1,1),
+	OrderDate Datetime,
+	CustomerID int,
+	ProductId int
+)
+
+Select * from Orders;
+Select * from Products;
+Select * from Customer1;
+
+insert into Orders (OrderDate,CustomerID,ProductId) values (GetDate(),4,2);
+
+alter table Orders add foreign key (CustomerID) references Customer1(Id); 
+
+alter table Orders add foreign key (ProductId) references Products(id); 
+
+/* Now we will join the tables */
+
+Select * from Orders as o
+inner join Products as p on o.ProductId = p.id;
+
+--The other method is like this:
+
+Select o.OrderDate,p.ProductName,p.Price,c.*
+from Orders o
+inner join Products p on o.ProductId = p.id
+inner join Customer1 c on o.CustomerID = c.Id;
+
+Select Sum(p.Price) as Total
+from Orders o
+inner join Products p on o.ProductId = p.id
+inner join Customer1 c on o.CustomerID = c.Id;
+
+Select c.LastName,p.ProductName, sum(p.Price) as Total
+from Orders o
+inner join Products p on o.ProductId = p.id
+inner join Customer1 c on o.CustomerID = c.Id
+group by c.LastName, p.ProductName;
+
+Select c.City, sum(p.Price) as Total, AVG(p.Price) as Average
+from Orders o
+inner join Products p on o.ProductId = p.id
+inner join Customer1 c on o.CustomerID = c.Id
+group by c.City;
